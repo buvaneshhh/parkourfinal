@@ -4,24 +4,31 @@ namespace ParkourSystem
 {
     public class ParkourController : MonoBehaviour
     {
-        private EnvironmentScanner _environmentScanner;
+        bool inAction;
+        EnvironmentScanner environmentScanner;
+        Animator animator;
 
         private void Awake()
         {
-            _environmentScanner = GetComponent<EnvironmentScanner>();
+            environmentScanner = GetComponent<EnvironmentScanner>();
+            animator = GetComponent<Animator>();
         }
 
         private void Update()
         {
-            var hitData = _environmentScanner.ObstacleCheck();
-
-            if (hitData.forwardHitFound)
+            if (Input.GetButton("Jump") && !inAction)
             {
-                Debug.Log(
-                    "Obstacle found: " + hitData.forwardHit.transform.name
-                );
-                // TODO: Trigger parkour actions here in later parts
+                var hitData = environmentScanner.ObstacleCheck();
+
+                 if (hitData.forwardHitFound)
+                {
+                    inAction = true;
+                    animator.CrossFade("Stepup", 0.2f );
+                }
+           
+
             }
+            
         }
     }
 }
