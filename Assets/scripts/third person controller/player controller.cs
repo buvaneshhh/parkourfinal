@@ -4,9 +4,12 @@ public class playercontroller : MonoBehaviour
 {
     [SerializeField] float moveSpeed = 5f;
     [SerializeField] float rotationspeed = 500f;
+    [Header("ground check settings")]
     [SerializeField] float groundCheckRadius = 0.2f ;
-    [SerializeField] float Vector3 groundCheckOffset ;
-    [SerializeField] float LayerMask groundLayer ;
+    [SerializeField] Vector3 groundCheckOffset ;
+    [SerializeField] LayerMask groundLayer ;
+    bool isGrounded;
+    float ySpeed;
 
     Quaternion targetrotation;
 
@@ -29,11 +32,24 @@ public class playercontroller : MonoBehaviour
 
         var moveInput = (new Vector3(h,0,v)).normalized;
         var moveDir = cameraController.PlanarRotation * moveInput;
+        GroundCheck();
+        if (isGrounded)
+        {
+            ySpeed = -0.5f;
+        }
+        else
+        {
+            ySpeed+= Physics.gravity.y * Time.deltaTime;
+        }
         
+        var Velocity = moveDir * moveSpeed;
+        Velocity.y = ySpeed;
+
+        Charactercontroller.Move(Velocity * Time.deltaTime);
 
         if (moveAmount>0)
         {
-            Charactercontroller.Move(moveDir * moveSpeed * Time.deltaTime);
+            
             targetrotation = Quaternion.LookRotation(moveDir);
         }
         
@@ -43,8 +59,13 @@ public class playercontroller : MonoBehaviour
     }
     void GroundCheck()
     {
-        physics.CheckSphere();
+        isGrounded = Physics.CheckSphere(transform.TransformPoint(groundCheckOffset), groundCheckRadius , groundLayer);
         
+    }
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = new Color(0,1,0,0.5f);
+        Gizmos.DrawSphere(transform.TransformPoint(groundCheckOffset) , groundCheckRadius);
     }
 
 }
